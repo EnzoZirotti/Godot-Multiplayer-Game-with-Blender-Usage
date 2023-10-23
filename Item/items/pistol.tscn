@@ -1,0 +1,48 @@
+[gd_scene load_steps=8 format=3 uid="uid://dqc5jr5yr8oua"]
+
+[ext_resource type="PackedScene" uid="uid://b0a5wvkn4s1qs" path="res://Pistol.blend" id="1_2r1oa"]
+[ext_resource type="Texture2D" uid="uid://brsmbomhvcn1u" path="res://addons/kenney_particle_pack/star_06.png" id="2_16glj"]
+
+[sub_resource type="Gradient" id="Gradient_jfxlx"]
+offsets = PackedFloat32Array(0, 0.252174, 1)
+colors = PackedColorArray(0, 0, 0, 0, 1, 1, 1, 1, 0.262745, 0.262745, 0.262745, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_di7ed"]
+gradient = SubResource("Gradient_jfxlx")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_rcsev"]
+gravity = Vector3(0, 0, 0)
+angle_min = 45.0
+angle_max = 45.0
+color_ramp = SubResource("GradientTexture1D_di7ed")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e2uqa"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(1, 1, 0.054902, 1)
+albedo_texture = ExtResource("2_16glj")
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_iflwk"]
+material = SubResource("StandardMaterial3D_e2uqa")
+size = Vector2(0.5, 0.5)
+orientation = 2
+
+[node name="Pistol" instance=ExtResource("1_2r1oa")]
+
+[node name="Light" parent="." index="1"]
+visible = false
+
+[node name="MuzzleFlash" type="GPUParticles3D" parent="." index="2"]
+transform = Transform3D(-0.0105591, 0, -0.999944, 0, 1, 0, 0.999944, 0, -0.0105591, 0.395097, 0.0700237, 0)
+emitting = false
+amount = 1
+lifetime = 0.25
+one_shot = true
+local_coords = true
+process_material = SubResource("ParticleProcessMaterial_rcsev")
+draw_pass_1 = SubResource("PlaneMesh_iflwk")

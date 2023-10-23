@@ -1,0 +1,97 @@
+[gd_scene load_steps=14 format=3 uid="uid://d2g5uvvaq44py"]
+
+[ext_resource type="PackedScene" uid="uid://n14jxs64ybqp" path="res://player/player.tscn" id="1_02hp2"]
+[ext_resource type="Script" path="res://main.gd" id="1_6hjdi"]
+[ext_resource type="Resource" uid="uid://c0ma1gnnv53qo" path="res://test_new_inv.tres" id="2_n5k6v"]
+[ext_resource type="PackedScene" uid="uid://dgxg0s3t03nfe" path="res://inventory/inventory.tscn" id="2_oy8mm"]
+[ext_resource type="Script" path="res://inventory/inventory_data_equip.gd" id="4_hsdnp"]
+[ext_resource type="Script" path="res://inventory/inventory_interface.gd" id="4_rfya2"]
+[ext_resource type="PackedScene" uid="uid://3eb2d22e80vu" path="res://inventory/slot.tscn" id="6_i5gcf"]
+[ext_resource type="PackedScene" uid="uid://byxle2lhrc1wv" path="res://inventory/hot_bar_inventory.tscn" id="7_eadqi"]
+[ext_resource type="PackedScene" uid="uid://w0eutsqi26it" path="res://environment.tscn" id="9_dueqt"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_e61pi"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="Sky_t4tvf"]
+sky_material = SubResource("ProceduralSkyMaterial_e61pi")
+
+[sub_resource type="Environment" id="Environment_uw8of"]
+background_mode = 2
+sky = SubResource("Sky_t4tvf")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="Resource" id="Resource_28gl8"]
+script = ExtResource("4_hsdnp")
+slot_datas = Array[Resource("res://inventory/slot_data.gd")]([null])
+
+[node name="World" type="Node"]
+script = ExtResource("1_6hjdi")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_uw8of")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
+shadow_enabled = true
+
+[node name="Player" parent="." instance=ExtResource("1_02hp2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.04014, 0)
+inventory_data = ExtResource("2_n5k6v")
+equip_inventory_data = SubResource("Resource_28gl8")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="InventoryInterface" type="Control" parent="UI"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("4_rfya2")
+
+[node name="PlayerInventory" parent="UI/InventoryInterface" instance=ExtResource("2_oy8mm")]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 50.0
+offset_bottom = 50.0
+
+[node name="EquipInventory" parent="UI/InventoryInterface" instance=ExtResource("2_oy8mm")]
+layout_mode = 0
+offset_left = 450.0
+offset_top = 10.0
+offset_right = 490.0
+offset_bottom = 50.0
+
+[node name="ExternalInventory" parent="UI/InventoryInterface" instance=ExtResource("2_oy8mm")]
+visible = false
+layout_mode = 0
+offset_left = 1060.0
+offset_top = 400.0
+offset_right = 1100.0
+offset_bottom = 440.0
+
+[node name="GrabbedSlot" parent="UI/InventoryInterface" instance=ExtResource("6_i5gcf")]
+visible = false
+modulate = Color(1, 1, 1, 0.498039)
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 0
+offset_right = 64.0
+offset_bottom = 64.0
+
+[node name="HotBarInventory" parent="UI" instance=ExtResource("7_eadqi")]
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 430.0
+offset_bottom = 90.0
+
+[node name="Environment" parent="." instance=ExtResource("9_dueqt")]
+
+[connection signal="drop_slot_data" from="UI/InventoryInterface" to="." method="_on_inventory_interface_drop_slot_data"]
+[connection signal="gui_input" from="UI/InventoryInterface" to="UI/InventoryInterface" method="_on_gui_input"]
+[connection signal="visibility_changed" from="UI/InventoryInterface" to="UI/InventoryInterface" method="_on_visibility_changed"]
