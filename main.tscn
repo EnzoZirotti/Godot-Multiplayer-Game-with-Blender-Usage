@@ -1,10 +1,7 @@
-[gd_scene load_steps=14 format=3 uid="uid://d2g5uvvaq44py"]
+[gd_scene load_steps=12 format=3 uid="uid://d2g5uvvaq44py"]
 
-[ext_resource type="PackedScene" uid="uid://n14jxs64ybqp" path="res://player/player.tscn" id="1_02hp2"]
 [ext_resource type="Script" path="res://main.gd" id="1_6hjdi"]
-[ext_resource type="Resource" uid="uid://c0ma1gnnv53qo" path="res://test_new_inv.tres" id="2_n5k6v"]
 [ext_resource type="PackedScene" uid="uid://dgxg0s3t03nfe" path="res://inventory/inventory.tscn" id="2_oy8mm"]
-[ext_resource type="Script" path="res://inventory/inventory_data_equip.gd" id="4_hsdnp"]
 [ext_resource type="Script" path="res://inventory/inventory_interface.gd" id="4_rfya2"]
 [ext_resource type="PackedScene" uid="uid://3eb2d22e80vu" path="res://inventory/slot.tscn" id="6_i5gcf"]
 [ext_resource type="PackedScene" uid="uid://byxle2lhrc1wv" path="res://inventory/hot_bar_inventory.tscn" id="7_eadqi"]
@@ -23,9 +20,11 @@ sky = SubResource("Sky_t4tvf")
 tonemap_mode = 2
 glow_enabled = true
 
-[sub_resource type="Resource" id="Resource_28gl8"]
-script = ExtResource("4_hsdnp")
-slot_datas = Array[Resource("res://inventory/slot_data.gd")]([null])
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4ige0"]
+bg_color = Color(0.847059, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6xg4p"]
+bg_color = Color(0, 0.729412, 0.0823529, 1)
 
 [node name="World" type="Node"]
 script = ExtResource("1_6hjdi")
@@ -37,12 +36,8 @@ environment = SubResource("Environment_uw8of")
 transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
 shadow_enabled = true
 
-[node name="Player" parent="." instance=ExtResource("1_02hp2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.04014, 0)
-inventory_data = ExtResource("2_n5k6v")
-equip_inventory_data = SubResource("Resource_28gl8")
-
 [node name="UI" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="InventoryInterface" type="Control" parent="UI"]
 visible = false
@@ -91,7 +86,91 @@ offset_right = 430.0
 offset_bottom = 90.0
 
 [node name="Environment" parent="." instance=ExtResource("9_dueqt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, -3, 0)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="MainMenu" type="PanelContainer" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 804.0
+offset_top = 440.0
+offset_right = -804.0
+offset_bottom = -440.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/MainMenu"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/MainMenu/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Label" type="Label" parent="CanvasLayer/MainMenu/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Main Menu"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HostButton" type="Button" parent="CanvasLayer/MainMenu/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Host"
+
+[node name="JoinButton" type="Button" parent="CanvasLayer/MainMenu/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Join"
+
+[node name="Address Entry" type="LineEdit" parent="CanvasLayer/MainMenu/MarginContainer/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "Enter Address to Join Here"
+alignment = 1
+
+[node name="HUD" type="Control" parent="CanvasLayer"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/HUD"]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HealthBar" type="ProgressBar" parent="CanvasLayer/HUD"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 609.0
+offset_top = 1.0
+offset_right = -531.0
+offset_bottom = -975.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_4ige0")
+theme_override_styles/fill = SubResource("StyleBoxFlat_6xg4p")
+max_value = 3.0
+value = 3.0
+show_percentage = false
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://player/player.tscn")
+spawn_path = NodePath("..")
 
 [connection signal="drop_slot_data" from="UI/InventoryInterface" to="." method="_on_inventory_interface_drop_slot_data"]
 [connection signal="gui_input" from="UI/InventoryInterface" to="UI/InventoryInterface" method="_on_gui_input"]
 [connection signal="visibility_changed" from="UI/InventoryInterface" to="UI/InventoryInterface" method="_on_visibility_changed"]
+[connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/HostButton" to="." method="_on_host_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/JoinButton" to="." method="_on_join_button_pressed"]
+[connection signal="spawned" from="MultiplayerSpawner" to="." method="_on_multiplayer_spawner_spawned"]

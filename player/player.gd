@@ -1,9 +1,23 @@
 extends CharacterBody3D
- 
+
+signal health_changed(health_value)
+signal toggle_inventory()
+
+@onready var camera: Camera3D = $Head/Camera3D
+@onready var interact_ray: RayCast3D = $Head/Camera3D/InteractRay
+@onready var head: Node3D = $Head
+@onready var anim_player = $AnimationPlayer
+@onready var muzzle_flash = $Head/Camera3D/Pistol/MuzzleFlash 
+@onready var raycast = $Head/Camera3D/RayCast3D
+
+
 @export var inventory_data: InventoryData
 @export var equip_inventory_data: InventoryDataEquip
 
 var speed: float = 0.0
+
+# Health
+var health: int = 3
 
 const WALK_SPEED: float = 5.0
 const SPRINT_SPEED: float = 8.0
@@ -19,26 +33,24 @@ var t_bob: float = 0.0
 const BASE_FOV: float = 75.0
 const FOV_CHANGE: float = 1.5
 
-# Health
-var health: int = 5
  
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
  
-signal toggle_inventory()
+func _enter_tree():
+	set_multiplayer_authority(str(name).to_int())
 
-@onready var camera: Camera3D = $Head/Camera3D
-@onready var interact_ray: RayCast3D = $Head/Camera3D/InteractRay
-@onready var head: Node3D = $Head
-@onready var anim_player = $AnimationPlayer
-@onready var muzzle_flash = $Head/Camera3D/Pistol/MuzzleFlash
 
 func _ready() -> void:
+	if not is_multiplayer_authority(): return
+	
 	PlayerManager.player = self
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
- 
+	camera.current = true
+
  
 func _unhandled_input(event: InputEvent) -> void:
+	if not is_multiplayer_authority(): return
 	
 	if event is InputEventMouseMotion:
 		head.rotate_y(-event.relative.x * SENSITIVITY)
@@ -51,13 +63,16 @@ func _unhandled_input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed("inventory"):
 		toggle_inventory.emit()
 		
-	if Input.is_action_just_pressed("interact"):
-		interact()
-		
-	if Input.is_action_just_pressed("shoot") and anim_player.current_animation != "shoot":
-		play_shoot_effects()
+	if Input.is_action_just_pressed("shoot") \
+			and anim_player.current_animation != "shoot":
+		play_shoot_effects.rpc()
+		if raycast.is_colliding():
+			var hit_player = raycast.get_collider()
+			hit_player.receive_damage.rpc_id(hit_player.get_multiplayer_authority())
  
 func _physics_process(delta: float) -> void:
+	if not is_multiplayer_authority(): return
+	
 		# Add the gravity.
 	if not is_on_floor():
 		velocity.y -= gravity * delta
@@ -125,10 +140,24 @@ func get_drop_position() -> Vector3:
 
 func heal(heal_value: int) -> void:
 	health += heal_value
+	print(heal_value)
 
+
+@rpc("call_local")
 func play_shoot_effects():
 	anim_player.stop()
 	anim_player.play("shoot")
 	muzzle_flash.restart()
 	muzzle_flash.emitting = true
 
+@rpc("any_peer")
+func receive_damage():
+	health -= 1
+	if health <= 0:
+		health = 3
+		position = Vector3.ZERO
+	health_changed.emit(health)
+
+func _on_animation_player_animation_finished(anim_name):
+	if anim_name == "shoot":
+		anim_player.play("idle")
