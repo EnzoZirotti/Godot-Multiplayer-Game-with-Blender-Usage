@@ -60,6 +60,8 @@ func _on_host_button_pressed():
 	multiplayer.peer_disconnected.connect(remove_player)
 	add_player(multiplayer.get_unique_id())
 
+	upnp_setup()
+
 func _on_join_button_pressed():
 	main_menu.hide()
 	hud.show()
