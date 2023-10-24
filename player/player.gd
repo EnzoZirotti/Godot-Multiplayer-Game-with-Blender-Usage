@@ -45,7 +45,7 @@ func _ready() -> void:
 	if not is_multiplayer_authority(): return
 	
 	PlayerManager.player = self
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	camera.current = true
 
  
@@ -57,8 +57,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		camera.rotate_x(-event.relative.y * SENSITIVITY)
 		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-40), deg_to_rad(60))
  
-	if Input.is_action_just_pressed("ui_cancel"):
-		get_tree().quit()
 		
 	if Input.is_action_just_pressed("inventory"):
 		toggle_inventory.emit()
