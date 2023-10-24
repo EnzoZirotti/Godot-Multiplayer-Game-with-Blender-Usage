@@ -68,7 +68,6 @@ func _on_join_button_pressed():
 	enet_peer.create_client(address_entry.text, PORT)
 	multiplayer.multiplayer_peer = enet_peer
 	
-	add_player(multiplayer.get_unique_id())
 	
 func add_player(peer_id):
 	var player = Player.instantiate()
